@@ -1,10 +1,16 @@
 package ext;
 
-//import Battleship/src/battleship/BattleshipDialog.java;
+import java.awt.Graphics;
+
+import battleship.BoardPanel;
 
 public aspect AddSound {
-	before():
-		call(){
-	
-		}
+
+	pointcut checkHit():
+	 execution(boolean *.isHit());
+
+	 before():
+		 checkHit(){
+		 	System.out.println("a shot was made");
+	 	}
 }

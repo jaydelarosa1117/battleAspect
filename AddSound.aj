@@ -17,7 +17,7 @@ public privileged aspect AddSound {
 	
 	
 	/** Directory where audio files are stored. */
-    private static final String SOUND_DIR = "/.src/sounds/";
+    private static final String SOUND_DIR = "";
 
     /** Play the given audio file. Inefficient because a file will be 
      * (re)loaded each time it is played. */
@@ -43,7 +43,7 @@ public privileged aspect AddSound {
 	 after():
 		 shot(){ 
 		 System.out.println("shot made");
-		//playSound("jamp.wav");
+		//playAudio("jamp.wav");
 	 }
 	 
 	 pointcut isSunk():within(battleship.model.Board) && execution(void notifyShipSunk(..));

@@ -33,7 +33,7 @@ public privileged aspect AddCheatKey {
 			if (p.hasShip()) {
 				int x = b.leftMargin + (p.getX() - 1) * b.placeSize;
 				int y = b.topMargin + (p.getY() - 1) * b.placeSize;
-				g.setColor(Color.BLACK);
+				g.setColor(Color.ORANGE);
 				g.fillRect(x + 1, y + 1, b.placeSize - 1, b.placeSize - 1);
 			}
 			if (p.isHit()) {

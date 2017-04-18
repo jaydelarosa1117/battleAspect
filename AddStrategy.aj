@@ -12,6 +12,7 @@ import java.util.Random;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import battleship.BattleshipDialog;
@@ -21,7 +22,7 @@ import battleship.model.Place;
 import battleship.model.Ship;
 
 public privileged aspect AddStrategy {
-	
+
 	private boolean reset = false;
 	private boolean againstCPU = false;
 	JButton playB = new JButton("play");
@@ -29,8 +30,7 @@ public privileged aspect AddStrategy {
 	PlayerPanel cpuPanel = new PlayerPanel(cpu, 10, 10, 30,
 			DEFAULT_BOARD_COLOR, DEFAULT_HIT_COLOR, DEFAULT_MISS_COLOR);
 	boolean gameover = false;
-	
-//	Board board;
+
 	Strategies s = new Strategies();
 	Coordinates c;
 	boolean lastHit = false;
@@ -38,11 +38,11 @@ public privileged aspect AddStrategy {
 
 	after(BattleshipDialog dialog): 
 		this(dialog) && execution(JPanel makeControlPane()){
-		
+
 		JDialog playerBoard = new JDialog(dialog, "Player Board");
-		
+
 		dialog.playButton.setText("practice");
-		
+
 		JPanel buttons = (JPanel) dialog.playButton.getParent();
 		buttons.add(playB);
 
@@ -52,16 +52,37 @@ public privileged aspect AddStrategy {
 				againstCPU = true;
 				s.createRandList();
 				gameover = false;
-				if(singleton){
-				reset = true;
-				redraw();
-				
-				dialog.startNewGame();
-				playerBoard.repaint();
-				
+				int jop = JOptionPane.showConfirmDialog(dialog,
+						"wanna do a smart?", "Battleship",
+						JOptionPane.YES_NO_OPTION);
+				if (jop == JOptionPane.YES_OPTION) {
+					isSmart = true;
+					dialog.startNewGame();
+					playerBoard.repaint();
+					if (singleton) {
+						reset = true;
+						redraw();
+
+						dialog.startNewGame();
+						playerBoard.repaint();
+
+					} else
+						player(playerBoard);
+
+				} else if (jop == JOptionPane.NO_OPTION) {
+					dialog.startNewGame();
+					playerBoard.repaint();
+					isSmart = false;
+					if (singleton) {
+						reset = true;
+						redraw();
+
+						dialog.startNewGame();
+						playerBoard.repaint();
+
+					} else
+						player(playerBoard);
 				}
-				else
-					player(playerBoard);
 			}
 		};
 		playB.addActionListener(l);
@@ -70,39 +91,54 @@ public privileged aspect AddStrategy {
 	pointcut addBoard(BattleshipDialog D) : execution(JPanel makeBoardPane()) && this(D);
 
 	pointcut interceptShot() : cflow(execution(void placeClicked(Place))) && !within(PlayerPanel) && call(* *.hit());
-	
+
 	pointcut blockClick() : within(battleship.BoardPanel) && execution( void mouseClicked(..));
-	
+
 	pointcut catchBoard(Board B, BoardPanel bp) : within(battleship.BoardPanel) && execution(BoardPanel.new(..)) && args(B) && this(bp);
 
-	
+	boolean isSmart = false;
+
 	after() : interceptShot(){
-		if(againstCPU){
-		c = s.smartShot(lastHit);
-		Place shot = cpu.at(c.getX(), c.getY());
-		cpuPanel.placeClicked(shot);
-		
-		if(cpu.isGameOver())
-			gameover = true;
-		
-		
-		
-		if(shot.hasShip())
-			lastHit = true;
-		else
-			lastHit = false;
+		if (againstCPU) {
+			if (isSmart) {
+				c = s.smartShot(lastHit);
+				Place shot = cpu.at(c.getX(), c.getY());
+				cpuPanel.placeClicked(shot);
+
+				if (cpu.isGameOver())
+					gameover = true;
+
+				if (shot.hasShip())
+					lastHit = true;
+				else
+					lastHit = false;
+			} else {
+				if (cpu.isGameOver()) {
+					gameover = true;
+				}
+				c = s.randomShot();
+				Place shot = cpu.at(c.getX(), c.getY());
+				cpuPanel.placeClicked(shot);
+			}
 		}
 
 	}
-	
+
 	void around() : blockClick(){
-		if(gameover)
+		if (gameover)
 			return;
 		else
 			proceed();
+
+	}
+
+	pointcut checkPractice() : within(battleship.BattleshipDialog) && cflow(execution(void playButtonClicked(ActionEvent))) && call(void startNewGame());
+
+	after(): 
+		checkPractice(){
+		againstCPU = false;
 		
 	}
-	
 
 	pointcut newGui(): execution(public static void main(String[])) && within(battleship.BattleshipDialog) && cflowbelow( execution(public static void main(String[])));
 
@@ -111,11 +147,11 @@ public privileged aspect AddStrategy {
 		BattleshipDialog.main(null);
 
 	}
-	
-	public void redraw(){
-		
+
+	public void redraw() {
+
 		Random random = new Random();
-		if(reset)
+		if (reset)
 			cpu.reset();
 		int size = cpu.size();
 		for (Ship ship : cpu.ships()) {
@@ -129,16 +165,13 @@ public privileged aspect AddStrategy {
 			} while (!cpu.placeShip(ship, i, j, dir));
 		}
 	}
-	
-	private void player(JDialog playerBoard){
-		
-		
-		
-		
+
+	private void player(JDialog playerBoard) {
+
 		JPanel newPanel = new JPanel(new BorderLayout());
 		Random random = new Random();
 
-		if(reset)
+		if (reset)
 			cpu.reset();
 		int size = cpu.size();
 		for (Ship ship : cpu.ships()) {
@@ -151,8 +184,6 @@ public privileged aspect AddStrategy {
 				dir = random.nextBoolean();
 			} while (!cpu.placeShip(ship, i, j, dir));
 		}
-
-		
 
 		playerBoard.setVisible(true);
 		Dimension dim = new Dimension(335, 370);

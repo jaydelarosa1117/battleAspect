@@ -124,6 +124,26 @@ public privileged aspect AddStrategy {
 
 	}
 
+	pointcut interceptPlay(BattleshipDialog D) : execution(void playButtonClicked(ActionEvent))  && this(D);
+
+	void around(BattleshipDialog D) : interceptPlay(D){
+		int jop = JOptionPane.showConfirmDialog(D,
+				"wanna do a practice?", "Battleship",
+				JOptionPane.YES_NO_OPTION);
+		if (jop == JOptionPane.YES_OPTION){
+			
+			D.startNewGame();
+
+			againstCPU = false;
+			cpu.reset();
+			cpuPanel.repaint();
+		}
+		
+		else
+			return;
+		
+	}
+
 	void around() : blockClick(){
 		if (gameover)
 			return;
@@ -137,7 +157,7 @@ public privileged aspect AddStrategy {
 	after(): 
 		checkPractice(){
 		againstCPU = false;
-		
+
 	}
 
 	pointcut newGui(): execution(public static void main(String[])) && within(battleship.BattleshipDialog) && cflowbelow( execution(public static void main(String[])));

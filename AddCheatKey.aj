@@ -1,5 +1,13 @@
 package ext;
 
+
+/* @author Jose de La Rosa
+ * @author Danner Pacheco
+ * 
+ * Created for CS3360
+ * 
+ */
+
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
@@ -21,6 +29,7 @@ public privileged aspect AddCheatKey {
 
 	pointcut cheatPrt(Graphics g, BoardPanel b) : within(battleship.BoardPanel) && execution(void paint(Graphics)) && args(g) && this(b) ;
 
+	
 	after(Graphics g, BoardPanel b):
 		cheatPrt(g,b){
 		if (doCheat) {
@@ -28,6 +37,11 @@ public privileged aspect AddCheatKey {
 		}
 	}
 
+	/*This method draws the cheatkey on top of the board. 
+	 * It is a modified version of the method found inside BoardPanel
+	 * @param b BoardPanel stores the ships that are usually hidden;
+	 * 
+	 */
 	public static void showShips(Graphics g, BoardPanel b) {
 		for (Place p : b.board.places()) {
 			if (p.hasShip()) {
@@ -55,6 +69,10 @@ public privileged aspect AddCheatKey {
 
 	pointcut addcode(BoardPanel p) : execution(BoardPanel.new(..)) && this(p);
 
+	/*Executes the code that allows the f5 key to be used
+	 * @param p BoardPanel is used to insert the code into the boardPanel
+	 * 
+	 */
 	after(BoardPanel p): addcode(p){
 		ActionMap actionMap = p.getActionMap();
 		int condition = JComponent.WHEN_IN_FOCUSED_WINDOW;

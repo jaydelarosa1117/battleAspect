@@ -1,5 +1,14 @@
 package ext;
 
+/* @author Jose de La Rosa
+ * @author Danner Pacheco
+ * 
+ * Created for CS3360
+ * 
+ */
+
+
+
 import static battleship.Constants.DEFAULT_BOARD_COLOR;
 import static battleship.Constants.DEFAULT_HIT_COLOR;
 import static battleship.Constants.DEFAULT_MISS_COLOR;
@@ -98,6 +107,11 @@ public privileged aspect AddStrategy {
 
 	boolean isSmart = false;
 
+	/*This method intercepts the shot made by the player and makes a shot to the player's board. 
+	 * If the player chose to play a samrt strategy, the shot made will be chosen by the smart staregy,
+	 * else it will be random
+	 * 
+	 */
 	after() : interceptShot(){
 		if (againstCPU) {
 			if (isSmart) {
@@ -126,9 +140,12 @@ public privileged aspect AddStrategy {
 
 	pointcut interceptPlay(BattleshipDialog D) : execution(void playButtonClicked(ActionEvent))  && this(D);
 
+	/*Replaces the code of the original play button to give it the behaviour of a practice button
+	 *@param D BattleshipDialog is used to access the methods inside of BattleshipDialog 
+	 */
 	void around(BattleshipDialog D) : interceptPlay(D){
 		int jop = JOptionPane.showConfirmDialog(D,
-				"wanna do a practice?", "Battleship",
+				"Practice?", "Battleship",
 				JOptionPane.YES_NO_OPTION);
 		if (jop == JOptionPane.YES_OPTION){
 			
@@ -144,6 +161,9 @@ public privileged aspect AddStrategy {
 		
 	}
 
+	/*If the game is over, this disables the input on the board. 
+	 * 
+	 */
 	void around() : blockClick(){
 		if (gameover)
 			return;
@@ -160,14 +180,10 @@ public privileged aspect AddStrategy {
 
 	}
 
-	pointcut newGui(): execution(public static void main(String[])) && within(battleship.BattleshipDialog) && cflowbelow( execution(public static void main(String[])));
 
-	after(): newGui(){
-
-		BattleshipDialog.main(null);
-
-	}
-
+	/*Redraws the ships when the player decides to play a new game
+	 * 
+	 */
 	public void redraw() {
 
 		Random random = new Random();
@@ -186,6 +202,9 @@ public privileged aspect AddStrategy {
 		}
 	}
 
+	/*Creates a new board with the players's ships. 
+	 * 
+	 */
 	private void player(JDialog playerBoard) {
 
 		JPanel newPanel = new JPanel(new BorderLayout());

@@ -1,5 +1,13 @@
 package ext;
 
+
+/* @author Jose de La Rosa
+ * @author Danner Pacheco
+ * 
+ * Created for CS3360
+ * 
+ */
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
